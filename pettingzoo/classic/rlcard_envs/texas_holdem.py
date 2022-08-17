@@ -73,7 +73,7 @@ class raw_env(RLCardBase):
         def calculate_height(screen_height, divisor, multiplier, tile_size, offset):
             return int(multiplier * screen_height / divisor + tile_size * offset)
 
-        screen_height = 1000
+        screen_height = 500
         screen_width = int(
             screen_height * (1 / 20)
             + np.ceil(len(self.possible_agents) / 2) * (screen_height * 1 / 2)
@@ -94,7 +94,7 @@ class raw_env(RLCardBase):
 
         bg_color = (7, 99, 36)
         white = (255, 255, 255)
-        blue = (67, 192, 250)
+        red = (217, 30, 61)
         self.screen.fill(bg_color)
 
         chips = {
@@ -146,7 +146,7 @@ class raw_env(RLCardBase):
                     )
 
             # Load and blit text for player name
-            font = get_font(os.path.join("font", "Minecraft.ttf"), 36)
+            font = get_font(os.path.join("font", "Minecraft.ttf"), 22)
 
             name = "Your player" if player == "player_0" else "Opponent"
             move = most_recent_move[player]
@@ -298,21 +298,20 @@ class raw_env(RLCardBase):
 
         if win_message is not None:
             # Load and blit text for player name
-            font = get_font(os.path.join("font", "Minecraft.ttf"), 42)
-            text = font.render(win_message, True, blue)
+            font = get_font(os.path.join("font", "Minecraft.ttf"), 18)
+            text = font.render(win_message, True, red)
             textRect = text.get_rect()
-            textRect.center = (
-                screen_width // 2,
-                screen_height // 2,
-            )
+            textRect.center = (screen_width // 2, int(screen_height * 0.45))
+            pygame.draw.rect(self.screen, white, textRect)
             self.screen.blit(text, textRect)
 
-            text = font.render("Click to continue", True, blue)
+            text = font.render("Click to continue", True, red)
             textRect = text.get_rect()
             textRect.center = (
                 screen_width // 2,
-                int(screen_height * 0.6),
+                int(screen_height * 0.55),
             )
+            pygame.draw.rect(self.screen, white, textRect)
             self.screen.blit(text, textRect)
 
         if mode == "human":
