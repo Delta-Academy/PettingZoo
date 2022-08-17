@@ -53,6 +53,7 @@ class raw_env(RLCardBase):
         mode="human",
         most_recent_move: Optional[Dict] = None,
         win_message: Optional[str] = None,
+        render_opponent_cards: bool = True,
     ):
         def calculate_width(self, screen_width, i):
             return int(
@@ -112,8 +113,10 @@ class raw_env(RLCardBase):
         for i, player in enumerate(self.possible_agents):
             state = self.env.game.get_state(self._name_to_int(player))
             for j, card in enumerate(state["hand"]):
-                # Load specified card
-                card_img = get_image(os.path.join("img", card + ".png"))
+                if not render_opponent_cards and player == "player_1":
+                    card_img = get_image(os.path.join("img", "Card.png"))
+                else:
+                    card_img = get_image(os.path.join("img", card + ".png"))
                 card_img = pygame.transform.scale(
                     card_img, (int(tile_size * (142 / 197)), int(tile_size))
                 )
@@ -301,6 +304,14 @@ class raw_env(RLCardBase):
             textRect.center = (
                 screen_width // 2,
                 screen_height // 2,
+            )
+            self.screen.blit(text, textRect)
+
+            text = font.render("Click to continue", True, blue)
+            textRect = text.get_rect()
+            textRect.center = (
+                screen_width // 2,
+                int(screen_height * 0.6),
             )
             self.screen.blit(text, textRect)
 
