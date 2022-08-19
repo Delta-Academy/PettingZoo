@@ -54,7 +54,12 @@ class raw_env(RLCardBase):
         most_recent_move: Optional[Dict] = None,
         win_message: Optional[str] = None,
         render_opponent_cards: bool = True,
+        screen: Optional[pygame.Surface] = None,
     ):
+        # Such hack
+        if screen is not None:
+            self.screen = screen
+
         def calculate_width(self, screen_width, i):
             return int(
                 (
