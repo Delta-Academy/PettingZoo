@@ -1,6 +1,6 @@
 from ast import Dict
 import os
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 import pygame
@@ -54,11 +54,20 @@ class raw_env(RLCardBase):
         most_recent_move: Optional[Dict] = None,
         win_message: Optional[str] = None,
         render_opponent_cards: bool = True,
+        player_names: Optional[List[str]] = None,
         screen: Optional[pygame.Surface] = None,
     ):
         # Such hack
         if screen is not None:
             self.screen = screen
+            screen_height = screen.get_height()
+            screen_width = screen.get_width()
+        else:
+            screen_height = 500
+            screen_width = int(
+                screen_height * (1 / 20)
+                + np.ceil(len(self.possible_agents) / 2) * (screen_height * 1 / 2)
+            )
 
         def calculate_width(self, screen_width, i):
             return int(
@@ -77,12 +86,6 @@ class raw_env(RLCardBase):
 
         def calculate_height(screen_height, divisor, multiplier, tile_size, offset):
             return int(multiplier * screen_height / divisor + tile_size * offset)
-
-        screen_height = 500
-        screen_width = int(
-            screen_height * (1 / 20)
-            + np.ceil(len(self.possible_agents) / 2) * (screen_height * 1 / 2)
-        )
 
         if self.screen is None:
             if mode == "human":
@@ -153,7 +156,11 @@ class raw_env(RLCardBase):
             # Load and blit text for player name
             font = get_font(os.path.join("font", "Minecraft.ttf"), 22)
 
-            name = "Your player" if player == "player_0" else "Opponent"
+            if player_names is None:
+                name = "Your player" if player == "player_0" else "Opponent"
+            else:
+                name = player_names[0] if player == "player_0" else player_names[1]
+
             move = most_recent_move[player]
             move_map = {
                 None: "",
@@ -319,8 +326,8 @@ class raw_env(RLCardBase):
             pygame.draw.rect(self.screen, white, textRect)
             self.screen.blit(text, textRect)
 
-        if mode == "human":
-            pygame.display.update()
+        # if mode == "human":
+        #     pygame.display.update()
 
         observation = np.array(pygame.surfarray.pixels3d(self.screen))
 
