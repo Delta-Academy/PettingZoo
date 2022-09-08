@@ -124,8 +124,8 @@ class raw_env(AECEnv):
         agent_factor = (
             go_base.BLACK if agent == self.possible_agents[0] else go_base.WHITE
         )
-        current_agent_plane_idx = np.where(self._go.board == agent_factor)
-        opponent_agent_plane_idx = np.where(self._go.board == -agent_factor)
+        current_agent_plane_idx = np.where(self.go_game.board == agent_factor)
+        opponent_agent_plane_idx = np.where(self.go_game.board == -agent_factor)
         current_agent_plane = np.zeros([self._N, self._N], dtype=bool)
         opponent_agent_plane = np.zeros([self._N, self._N], dtype=bool)
         current_agent_plane[current_agent_plane_idx] = 1
@@ -163,7 +163,7 @@ class raw_env(AECEnv):
     def step(self, action):
         if self.dones[self.agent_selection]:
             return self._was_done_step(action)
-        self._go = self._go.play_move(coords.from_flat(action))
+        self.go_game = self.go_game.play_move(coords.from_flat(action))
         self._last_obs = self.observe(self.agent_selection)
         current_agent_plane, opponent_agent_plane = self._encode_board_planes(
             self.agent_selection
@@ -172,15 +172,15 @@ class raw_env(AECEnv):
             (current_agent_plane, opponent_agent_plane, self.board_history[:, :, :-2])
         )
         next_player = self._agent_selector.next()
-        if self._go.is_game_over():
+        if self.go_game.is_game_over():
             self.dones = self._convert_to_dict([True for _ in range(self.num_agents)])
             self.rewards = self._convert_to_dict(
-                self._encode_rewards(self._go.result())
+                self._encode_rewards(self.go_game.result())
             )
             self.next_legal_moves = [self._N * self._N]
         else:
             self.next_legal_moves = self._encode_legal_actions(
-                self._go.all_legal_moves()
+                self.go_game.all_legal_moves()
             )
         self.agent_selection = (
             next_player if next_player else self._agent_selector.next()
@@ -189,7 +189,7 @@ class raw_env(AECEnv):
 
     def reset(self, seed=None, return_info=False, options=None):
         self.has_reset = True
-        self._go = go_base.Position(board=None, komi=self._komi)
+        self.go_game = go_base.Position(board=None, komi=self._komi)
 
         self.agents = self.possible_agents[:]
         self._agent_selector.reinit(self.agents)
@@ -197,14 +197,17 @@ class raw_env(AECEnv):
         self._cumulative_rewards = self._convert_to_dict(np.array([0.0, 0.0]))
         self.rewards = self._convert_to_dict(np.array([0.0, 0.0]))
         self.dones = self._convert_to_dict([False for _ in range(self.num_agents)])
+
         self.infos = self._convert_to_dict([{} for _ in range(self.num_agents)])
-        self.next_legal_moves = self._encode_legal_actions(self._go.all_legal_moves())
+        self.next_legal_moves = self._encode_legal_actions(
+            self.go_game.all_legal_moves()
+        )
         self._last_obs = self.observe(self.agents[0])
         self.board_history = np.zeros((self._N, self._N, 16), dtype=bool)
 
     def render(self, mode="human"):
-        screen_width = 1026
-        screen_height = 1026
+        screen_width = 500
+        screen_height = 500
 
         if self.screen is None:
             if mode == "human":
@@ -273,15 +276,15 @@ class raw_env(AECEnv):
         # Blit the necessary chips and their positions
         for i in range(0, size):
             for j in range(0, size):
-                if self._go.board[i][j] == go_base.BLACK:
+                if self.go_game.board[i][j] == go_base.BLACK:
                     self.screen.blit(
                         black_stone,
-                        ((i * (tile_size) + offset), int(j) * (tile_size) + offset),
+                        ((j * (tile_size) + offset), int(i) * (tile_size) + offset),
                     )
-                elif self._go.board[i][j] == go_base.WHITE:
+                elif self.go_game.board[i][j] == go_base.WHITE:
                     self.screen.blit(
                         white_stone,
-                        ((i * (tile_size) + offset), int(j) * (tile_size) + offset),
+                        ((j * (tile_size) + offset), int(i) * (tile_size) + offset),
                     )
 
         if mode == "human":
