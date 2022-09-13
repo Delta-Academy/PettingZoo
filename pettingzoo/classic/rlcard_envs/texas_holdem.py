@@ -326,8 +326,8 @@ class raw_env(RLCardBase):
             pygame.draw.rect(self.screen, white, textRect)
             self.screen.blit(text, textRect)
 
-        # if mode == "human":
-        #     pygame.display.update()
+        if mode == "human" and screen is None:
+            pygame.display.update()
 
         observation = np.array(pygame.surfarray.pixels3d(self.screen))
 
