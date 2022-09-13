@@ -20,41 +20,6 @@ class OrderEnforcingWrapper(BaseWrapper):
         self._has_updated = False
         super().__init__(env)
 
-    def __getattr__(self, value):
-        """
-        raises an error message when data is gotten from the env
-        which should only be gotten after reset
-        """
-        if value == "unwrapped":
-            return self.env.unwrapped
-        elif value == "possible_agents":
-            EnvLogger.error_possible_agents_attribute_missing("possible_agents")
-        elif value == "observation_spaces":
-            raise AttributeError(
-                "The base environment does not have an possible_agents attribute. Use the environments `observation_space` method instead"
-            )
-        elif value == "action_spaces":
-            raise AttributeError(
-                "The base environment does not have an possible_agents attribute. Use the environments `action_space` method instead"
-            )
-        elif value == "agent_order":
-            raise AttributeError(
-                "agent_order has been removed from the API. Please consider using agent_iter instead."
-            )
-        elif value in {
-            "rewards",
-            "dones",
-            "infos",
-            "agent_selection",
-            "num_agents",
-            "agents",
-        }:
-            raise AttributeError(f"{value} cannot be accessed before reset")
-        else:
-            raise AttributeError(
-                f"'{type(self).__name__}' object has no attribute '{value}'"
-            )
-
     def render(self, mode="human", **kwargs):
         if not self._has_reset:
             EnvLogger.error_render_before_reset()

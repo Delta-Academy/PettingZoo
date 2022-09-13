@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import numpy as np
 import pygame
@@ -205,21 +206,23 @@ class raw_env(AECEnv):
         self._last_obs = self.observe(self.agents[0])
         self.board_history = np.zeros((self._N, self._N, 16), dtype=bool)
 
-    def render(self, mode="human"):
-        screen_width = 500
-        screen_height = 500
+    def render(self, mode="human", screen_override: Optional[pygame.Surface] = None):
+        """
+        self.screen: Pass a custom self.screen here, otherwise a new one will be inited
+        """
 
-        if self.screen is None:
+        if self.screen is None and screen_override is None:
             if mode == "human":
                 pygame.init()
-                self.screen = pygame.display.set_mode((screen_width, screen_height))
+                self.screen = pygame.display.set_mode((500, 500))
+                pygame.event.get()
             else:
-                self.screen = pygame.Surface((screen_width, screen_height))
-        if mode == "human":
-            pygame.event.get()
+                self.screen = pygame.Surface((500, 500))
+
+        screen = self.screen if screen_override is None else screen_override
+        screen_width = screen.get_width()
 
         size = go_base.N
-
         # Load and scale all of the necessary images
         tile_size = (screen_width) / size
 
@@ -241,7 +244,7 @@ class raw_env(AECEnv):
         # blit board tiles
         for i in range(1, size - 1):
             for j in range(1, size - 1):
-                self.screen.blit(tile_img, ((i * (tile_size)), int(j) * (tile_size)))
+                screen.blit(tile_img, ((i * (tile_size)), int(j) * (tile_size)))
 
         for i in range(1, 9):
             tile_img = get_image(os.path.join("img", "GO_Tile" + str(i) + ".png"))
@@ -250,47 +253,48 @@ class raw_env(AECEnv):
             )
             for j in range(1, size - 1):
                 if i == 1:
-                    self.screen.blit(tile_img, (0, int(j) * (tile_size)))
+                    screen.blit(tile_img, (0, int(j) * (tile_size)))
                 elif i == 2:
-                    self.screen.blit(tile_img, ((int(j) * (tile_size)), 0))
+                    screen.blit(tile_img, ((int(j) * (tile_size)), 0))
                 elif i == 3:
-                    self.screen.blit(
+                    screen.blit(
                         tile_img, ((size - 1) * (tile_size), int(j) * (tile_size))
                     )
                 elif i == 4:
-                    self.screen.blit(
+                    screen.blit(
                         tile_img, ((int(j) * (tile_size)), (size - 1) * (tile_size))
                     )
             if i == 5:
-                self.screen.blit(tile_img, (0, 0))
+                screen.blit(tile_img, (0, 0))
             elif i == 6:
-                self.screen.blit(tile_img, ((size - 1) * (tile_size), 0))
+                screen.blit(tile_img, ((size - 1) * (tile_size), 0))
             elif i == 7:
-                self.screen.blit(
+                screen.blit(
                     tile_img, ((size - 1) * (tile_size), (size - 1) * (tile_size))
                 )
             elif i == 8:
-                self.screen.blit(tile_img, (0, (size - 1) * (tile_size)))
+                screen.blit(tile_img, (0, (size - 1) * (tile_size)))
 
         offset = tile_size * (1 / 6)
         # Blit the necessary chips and their positions
         for i in range(0, size):
             for j in range(0, size):
                 if self.go_game.board[i][j] == go_base.BLACK:
-                    self.screen.blit(
+                    screen.blit(
                         black_stone,
                         ((j * (tile_size) + offset), int(i) * (tile_size) + offset),
                     )
                 elif self.go_game.board[i][j] == go_base.WHITE:
-                    self.screen.blit(
+                    screen.blit(
                         white_stone,
                         ((j * (tile_size) + offset), int(i) * (tile_size) + offset),
                     )
 
-        if mode == "human":
+        # If ovveriding the screen likely want to update display downstream
+        if screen_override is None:
             pygame.display.update()
 
-        observation = np.array(pygame.surfarray.pixels3d(self.screen))
+        observation = np.array(pygame.surfarray.pixels3d(screen))
 
         return (
             np.transpose(observation, axes=(1, 0, 2)) if mode == "rgb_array" else None
