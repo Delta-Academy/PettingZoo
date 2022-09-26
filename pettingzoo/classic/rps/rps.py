@@ -150,9 +150,7 @@ class raw_env(AECEnv):
 
         # Set font properties
         black = (0, 0, 0)
-        font = get_font(
-            (os.path.join("font", "Minecraft.ttf")), int(screen_height / 25)
-        )
+        font = get_font(os.path.join("font", "Minecraft.ttf"), 36)
 
         for i, move in enumerate(self.history[0:10]):
             # Blit move history
