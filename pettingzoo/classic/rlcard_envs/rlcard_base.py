@@ -64,7 +64,7 @@ class RLCardBase(AECEnv):
         }
 
         if options is not None:
-            config |= options
+            config = {**config, **options}
         self.env = rlcard.make(self.name, config)
 
     def _scale_rewards(self, reward):

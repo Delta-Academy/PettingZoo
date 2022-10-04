@@ -118,7 +118,7 @@ class raw_env(RLCardBase):
 
     def get_player_chip_position(self, player_idx):
         if player_idx % 2 == 0:
-            offset = -0.5
+            offset = -0.2
             multiplier = 1
         else:
             offset = 0.5
