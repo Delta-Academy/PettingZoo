@@ -1,3 +1,4 @@
+from typing import Dict, Optional
 import numpy as np
 import rlcard
 from gym import spaces
@@ -55,12 +56,15 @@ class RLCardBase(AECEnv):
     def action_space(self, agent):
         return self.action_spaces[agent]
 
-    def seed(self, seed=None):
+    def seed(self, seed=None, options: Optional[Dict] = None):
         config = {
             "allow_step_back": False,
             "seed": seed,
             "game_num_players": self.num_players,
         }
+
+        if options is not None:
+            config |= options
         self.env = rlcard.make(self.name, config)
 
     def _scale_rewards(self, reward):
@@ -107,9 +111,9 @@ class RLCardBase(AECEnv):
         self._accumulate_rewards()
         self._dones_step_first()
 
-    def reset(self, seed=None, return_info=False, options=None):
+    def reset(self, seed=None, return_info=False, options: Optional[Dict] = None):
         if seed is not None:
-            self.seed(seed=seed)
+            self.seed(seed=seed, options=options)
         obs, player_id = self.env.reset()
         self.agents = self.possible_agents[:]
         self.agent_selection = self._int_to_name(player_id)
