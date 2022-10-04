@@ -344,3 +344,4 @@ class raw_env(RLCardBase):
             y_pos - ((height + 1) * self.tile_size / 15),
         )
         self.screen.blit(text, textRect)
+
