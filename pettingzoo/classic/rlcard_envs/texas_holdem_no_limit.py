@@ -95,16 +95,7 @@ class raw_env(RLCardBase):
                 for _ in range(self.num_agents)
             ]
         )
-
-        self.screen_height = 500
-        self.screen_width = int(
-            self.screen_height * (1 / 20)
-            + np.ceil(len(self.possible_agents) / 2) * (self.screen_height * 1 / 2)
-        )
-        self.tile_size = self.screen_height * 2 / 10
-        pygame.init()
-        # This used to have 'if mode == human' logic, could break
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        self.screen = None
 
     def calculate_width(self, i):
         return int(
@@ -145,6 +136,20 @@ class raw_env(RLCardBase):
             self.screen = screen
             self.screen_height = screen.get_height()
             self.screen_width = screen.get_width()
+            self.tile_size = self.screen_height * 2 / 10
+
+        if self.screen is None and screen is None:
+            # Screens not initialised and not injected, so initialise
+            self.screen_height = 500
+            self.screen_width = int(
+                self.screen_height * (1 / 20)
+                + np.ceil(len(self.possible_agents) / 2) * (self.screen_height * 1 / 2)
+            )
+            self.tile_size = self.screen_height * 2 / 10
+            pygame.init()
+            self.screen = pygame.display.set_mode(
+                (self.screen_width, self.screen_height)
+            )
 
         if mode == "human":
             pygame.event.get()
