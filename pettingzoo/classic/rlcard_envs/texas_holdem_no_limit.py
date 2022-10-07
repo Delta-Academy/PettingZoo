@@ -321,7 +321,8 @@ class raw_env(RLCardBase):
             pygame.draw.rect(self.screen, WHITE, textRect)
             self.screen.blit(text, textRect)
 
-            second_line = "Click to continue" if continue_hands else "Game over!"
+            second_line = "Click to continue" if continue_hands else None
+
             text = font.render(second_line, True, RED)
             textRect = text.get_rect()
             textRect.center = (
