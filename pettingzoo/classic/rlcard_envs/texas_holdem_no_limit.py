@@ -127,7 +127,7 @@ class raw_env(RLCardBase):
         most_recent_move: Optional[Dict] = None,
         win_message: Optional[str] = None,
         render_opponent_cards: bool = True,
-        player_names: Optional[List[str]] = None,
+        show_player_names: bool = True,
         screen: Optional[pygame.Surface] = None,
         continue_hands: bool = True,
     ):
@@ -159,6 +159,7 @@ class raw_env(RLCardBase):
         self.screen.fill(BG_COLOR)
 
         # Load and blit all images for each card in each player's hand
+
         for i, player in enumerate(self.possible_agents[::-1]):
             state = self.env.game.get_state(self._name_to_int(player))
             for j, card in enumerate(state["hand"]):
@@ -201,11 +202,6 @@ class raw_env(RLCardBase):
             # Load and blit text for player name
             font = pygame.font.SysFont("arial", 22)
 
-            if player_names is None:
-                name = "Your player" if player == "player_0" else "Opponent"
-            else:
-                name = player_names[0] if player == "player_0" else player_names[1]
-
             move = most_recent_move[player]
 
             move_map: Dict[int, str] = {
@@ -217,7 +213,12 @@ class raw_env(RLCardBase):
                 4: "all in",
             }  # type: ignore
 
-            text = font.render(f"{name}: move = {move_map[move]}", True, WHITE)
+            if show_player_names:
+                name = "Your player" if player == "player_0" else "Opponent"
+                text = font.render(f"{name}: move = {move_map[move]}", True, WHITE)
+            else:
+                text = font.render(f"move = {move_map[move]}", True, WHITE)
+
             textRect = text.get_rect()
             if i % 2 == 0:
                 textRect.center = (
